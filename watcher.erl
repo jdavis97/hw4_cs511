@@ -9,22 +9,35 @@ start() ->
           io:fwrite("setup: range must be at least 2~n", []);
        true ->
          Num_watchers = 1 + (N div 10),
-         L = setup_loop(0, N, []), 
-         %werk here zach
+         %L = setup_loop(0, N, []),
+         setup_loop(N, Num_watchers),
     end.
 
-setup_loop(Cur_SID, Last_SID, L) when Cur_SID >= Last_SID ->
-    L;
-setup_loop(Cur_SID, Last_SID, L) ->
-    {S_Pid, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Cur_SID]),
-    setup_loop(Cur_SID+1, Last_SID, L ++ [{Cur_SID, S_Pid}]).
+% setup_loop(Cur_SID, Last_SID, L) when Cur_SID >= Last_SID ->
+%     L;
+% setup_loop(Cur_SID, Last_SID, L) ->
+%     {S_Pid, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Cur_SID]),
+%     setup_loop(Cur_SID+1, Last_SID, L ++ [{Cur_SID, S_Pid}]).
+
+% setup_loop(N, 0) ->
+%   ;
+% setup_loop(N,Num_watchers, Curr_sensor_num) when N >=10 ->
+%   Watcher_Pid = spawn(watcher, watcher_start, [10, Curr_sensor_num, []]),
+%   setup_loop(N-10, Num_watchers-1, Curr_sensor_num+1);
+% setup_loop(N,Num_watchers, Curr_sensor_num) when N < 10 ->
+%   Watcher_Pid = spawn(watcher, watcher_start, [10, Curr_sensor_num, []]).
+%
+% watcher_start(0, Curr_sensor_num, L) ->
+%   spawn_monitor()
+% watcher_start(Num_sensors, Curr_sensor_num, L) ->
+
 
 watcher(L) ->
   io:format("~w~n", [L]), %print L
   receive
     {Sensor_ID, Measurement} ->
       io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]);
-    {'EXIT', Reason} ->
+    {'DOWN', _Ref, gen_sensor, _PID, anomalous_reading} ->
       io:format("Sensor_ID crashed because of ~w~n", [Reason]),
       %start new sensor
       %update L
