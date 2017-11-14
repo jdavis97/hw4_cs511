@@ -30,26 +30,27 @@ start() ->
 % watcher_start(0, Curr_sensor_num, L) ->
 %   spawn_monitor()
 % watcher_start(Num_sensors, Curr_sensor_num, L) ->
+
+
+
 setup_loop(N, 0, Curr_sensor_num) ->
-  %needs to be spawn
   W_ID = spawn(watcher, watcher_start, [list:seq(Curr_sensor_num, Curr_sensor_num+N), []]);
-  %watcher_start(N, Curr_sensor_num);
+      %catches the last case where the watcher will watch less than 10 sensors,
 setup_loop(N, Num_watchers, Curr_sensor_num) ->
-  %needs to be spawn
   W_ID = spawn(watcher, watcher_start, [list:seq(Curr_sensor_num, Curr_sensor_num+10), []]);
-  %watcher_start(10, Curr_sensor_num),
+      %spawns a watcher_starter with a list of numbers representing the Sensor IDs that watcher should monitor
   setup_loop(N-10, Num_watchers-1, Curr_sensor_num+10).
 
 watcher_start([], L_watched_sensors) ->
   watcher(L_watched_sensors);
+      %initiates the receive loop of a watcher
 watcher_start(L_sensorIDs, L_watched_sensors) ->
   Curr_sensorID = list:nth(0,L_sensorIDs),
+      %grabs the sensor ID at the front of the list
   {Sensor_PID, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Curr_sensorID]),
+      %spawns the sensor with arguments of the watcher PID and the sensor ID, also sets the watcher to monitor that sensor
   watcher_start(list:nthtail(0,L_sensorIDs),list:append(L_watched_sensors, {Curr_sensorID, Sensor_PID}).
-    %L = list:seq(Curr_sensor, Num_sensors),
-    %sensorList.append for each spawn_monitor(sensor, gen_sensor, [self(), L[i]])
-    %sensor list is a list of pairs of {sensor_ID, sensor_Pid}
-    %call watcher(sensorList)
+      %recursive call teh watcher start with first argument the L_sensorIDs[1:] and the tail recursive built list of {sensorID, sensorPID}
 
 watcher(L) ->
   io:format("~w~n", [L]), %print L
