@@ -1,5 +1,6 @@
 -module(watcher).
 -compile(export_all).
+-author("Zach Saegesser, Khayyam Saleem").
 
 
 start() ->

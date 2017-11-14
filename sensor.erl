@@ -1,5 +1,6 @@
 -module(sensor).
 -export([sensor/2]).
+-author("Zach Saegesser, Khayyam Saleem").
 
 
 gen_sensor(Watcher_Pid, Sensor_ID) ->
