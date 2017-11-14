@@ -31,9 +31,13 @@ start() ->
 %   spawn_monitor()
 % watcher_start(Num_sensors, Curr_sensor_num, L) ->
 setup_loop(N, 0, Curr_sensor_num) ->
-  watcher_start(N, Curr_sensor_num);
+  %needs to be spawn
+  W_ID = spawn(watcher, watcher_start, [N, Curr_sensor_num]);
+  %watcher_start(N, Curr_sensor_num);
 setup_loop(N, Num_watchers, Curr_sensor_num) ->
-  watcher_start(10, Curr_sensor_num),
+  %needs to be spawn
+  W_ID = spawn(watcher, watcher_start, [10, Curr_sensor_num]);
+  %watcher_start(10, Curr_sensor_num),
   setup_loop(N-10, Num_watchers-1, Curr_sensor_num+10).
 
 
