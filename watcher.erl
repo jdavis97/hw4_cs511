@@ -25,8 +25,8 @@ setup_loop(N, Num_watchers) ->
 watcher(L) ->
   io:format("~w~n", [L]), %print L
   receive
-    {Sensor_ID, Measurment} ->
-      io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurment]);
+    {Sensor_ID, Measurement} ->
+      io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]);
     {'EXIT', Reason} ->
       io:format("Sensor_ID crashed because of ~w~n"),
       %start new sensor
