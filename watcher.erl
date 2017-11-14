@@ -10,7 +10,7 @@ start() ->
        true ->
          Num_watchers = 1 + (N div 10),
          %L = setup_loop(0, N, []),
-         setup_loop(N, Num_watchers),
+         setup_loop(N, Num_watchers,0),
     end.
 
 % setup_loop(Cur_SID, Last_SID, L) when Cur_SID >= Last_SID ->
@@ -30,7 +30,18 @@ start() ->
 % watcher_start(0, Curr_sensor_num, L) ->
 %   spawn_monitor()
 % watcher_start(Num_sensors, Curr_sensor_num, L) ->
+setup_loop(N, 0, Curr_sensor_num) ->
+  watcher_start(N, Curr_sensor_num);
+setup_loop(N, Num_watchers, Curr_sensor_num) ->
+  watcher_start(10, Curr_sensor_num),
+  setup_loop(N-10, Num_watchers-1, Curr_sensor_num+10).
 
+
+watcher_start(Num_sensors, Curr_sensor) ->
+    L = list:seq(Curr_sensor, Num_sensors),
+    %sensorList.append for each spawn_monitor(sensor, gen_sensor, [self(), L[i]])
+    %sensor list is a list of pairs of {sensor_ID, sensor_Pid}
+    %call watcher(sensorList)
 
 watcher(L) ->
   io:format("~w~n", [L]), %print L
