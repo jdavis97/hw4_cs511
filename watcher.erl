@@ -8,19 +8,15 @@ start() ->
           io:fwrite("setup: range must be at least 2~n", []);
        true ->
          Num_watchers = 1 + (N div 10),
-         setup_loop(N, Num_watchers)
- end.
+         L = setup_loop(0, N, []), 
+         %werk here zach
+    end.
 
-setup_loop(0, Num_watchers) ->
-  %stop
-  ;
-setup_loop(N, Num_watchers) ->
-
-
-
-
-
-
+setup_loop(Cur_SID, Last_SID, L) when Cur_SID >= Last_SID ->
+    L;
+setup_loop(Cur_SID, Last_SID, L) ->
+    {S_Pid, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Cur_SID]),
+    setup_loop(Cur_SID+1, Last_SID, L ++ [{Cur_SID, S_Pid}]).
 
 watcher(L) ->
   io:format("~w~n", [L]), %print L
@@ -28,7 +24,7 @@ watcher(L) ->
     {Sensor_ID, Measurement} ->
       io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]);
     {'EXIT', Reason} ->
-      io:format("Sensor_ID crashed because of ~w~n"),
+      io:format("Sensor_ID crashed because of ~w~n", [Reason]),
       %start new sensor
       %update L
   %recieve Measurment
