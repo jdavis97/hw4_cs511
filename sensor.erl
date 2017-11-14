@@ -1,4 +1,4 @@
--module(senser).
+-module(sensor).
 -compile(export_all).
 
 
