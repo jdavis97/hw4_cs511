@@ -32,17 +32,21 @@ start() ->
 % watcher_start(Num_sensors, Curr_sensor_num, L) ->
 setup_loop(N, 0, Curr_sensor_num) ->
   %needs to be spawn
-  W_ID = spawn(watcher, watcher_start, [N, Curr_sensor_num]);
+  W_ID = spawn(watcher, watcher_start, [list:seq(Curr_sensor_num, Curr_sensor_num+N), []]);
   %watcher_start(N, Curr_sensor_num);
 setup_loop(N, Num_watchers, Curr_sensor_num) ->
   %needs to be spawn
-  W_ID = spawn(watcher, watcher_start, [10, Curr_sensor_num]);
+  W_ID = spawn(watcher, watcher_start, [list:seq(Curr_sensor_num, Curr_sensor_num+10), []]);
   %watcher_start(10, Curr_sensor_num),
   setup_loop(N-10, Num_watchers-1, Curr_sensor_num+10).
 
-
-watcher_start(Num_sensors, Curr_sensor) ->
-    L = list:seq(Curr_sensor, Num_sensors),
+watcher_start([], L_watched_sensors) ->
+  watcher(L_watched_sensors);
+watcher_start(L_sensorIDs, L_watched_sensors) ->
+  Curr_sensorID = list:nth(0,L_sensorIDs),
+  {Sensor_PID, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Curr_sensorID]),
+  watcher_start(list:nthtail(0,L_sensorIDs),list:append(L_watched_sensors, {Curr_sensorID, Sensor_PID}).
+    %L = list:seq(Curr_sensor, Num_sensors),
     %sensorList.append for each spawn_monitor(sensor, gen_sensor, [self(), L[i]])
     %sensor list is a list of pairs of {sensor_ID, sensor_Pid}
     %call watcher(sensorList)
