@@ -7,11 +7,11 @@ sensor(Watcher_Pid, Sensor_ID) ->
   %sensor crashes it the watcher will restart it
   Sleep_time = rand:uniform(10000),
   timer:sleep(Sleep_time),
-  Measurment = rand:uniform(11),
+  Measurement = rand:uniform(11),
 
-  case Measurment of
+  case Measurement of
     11 -> exit(anomalous_reading);
-    Otherwise -> Watcher_Pid!{Sensor_ID, Measurment}
+    Otherwise -> Watcher_Pid!{Sensor_ID, Measurement}
   end.
 
   %if num is 11 thenn crashes sensor
