@@ -45,22 +45,27 @@ watcher_start([], L_watched_sensors) ->
   watcher(L_watched_sensors);
       %initiates the receive loop of a watcher
 watcher_start(L_sensorIDs, L_watched_sensors) ->
-  Curr_sensorID = list:nth(0,L_sensorIDs),
+  Curr_sensorID = list:nth(1,L_sensorIDs),
       %grabs the sensor ID at the front of the list
   {Sensor_PID, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Curr_sensorID]),
       %spawns the sensor with arguments of the watcher PID and the sensor ID, also sets the watcher to monitor that sensor
-  watcher_start(list:nthtail(0,L_sensorIDs),list:append(L_watched_sensors, {Curr_sensorID, Sensor_PID}).
-      %recursive call teh watcher start with first argument the L_sensorIDs[1:] and the tail recursive built list of {sensorID, sensorPID}
+  watcher_start(list:nthtail(1,L_sensorIDs),list:append(L_watched_sensors, [{Curr_sensorID, Sensor_PID}]).
+      %recursive call the watcher start with first argument the L_sensorIDs[1:] and the tail recursive built list of {sensorID, sensorPID}
 
 watcher(L) ->
   io:format("~w~n", [L]), %print L
   receive
     {Sensor_ID, Measurement} ->
       io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]);
-    {'DOWN', _Ref, gen_sensor, _PID, anomalous_reading} ->
-      io:format("Sensor_ID crashed because of ~w~n", [Reason]),
-      %start new sensor
-      %update L
+    {'DOWN', _Ref, gen_sensor, PID, anomalous_reading} ->
+      {Sensor_ID, SPID} = lists:keyfind(PID, 2, L),
+      io:format("Sensor ~w crashed because of ~w~n", [Sensor_ID, Reason]),
+      {Sensor_PID, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Sensor_ID]),
+      Temp_list = L -- {Sensor_ID, SPID},
+      New_list = Temp_list ++ [{Sensor_ID, Sensor_PID}],
+      io:format("~w~n", [New_list]),
+      watcher(New_list).
+
   %recieve Measurment
   %        catch exit(anomalous_reading) ->print sensor number
   %             restart sensor, delete crashed from List and add new one

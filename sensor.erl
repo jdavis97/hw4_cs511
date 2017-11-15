@@ -1,5 +1,5 @@
 -module(sensor).
--export([sensor/2]).
+-export([gen_sensor/2]).
 -author("Zach Saegesser, Khayyam Saleem").
 
 
