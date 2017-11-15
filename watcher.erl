@@ -33,7 +33,7 @@ start() ->
 
 
 
-setup_loop(N, 0, Curr_sensor_num) ->
+setup_loop(N, 1, Curr_sensor_num) ->
   W_ID = spawn(watcher, watcher_start, [lists:seq(Curr_sensor_num, Curr_sensor_num+N), []]);
       %catches the last case where the watcher will watch less than 10 sensors,
 setup_loop(N, Num_watchers, Curr_sensor_num) ->
@@ -53,15 +53,17 @@ watcher_start(L_sensorIDs, L_watched_sensors) ->
       %recursive call the watcher start with first argument the L_sensorIDs[1:] and the tail recursive built list of {sensorID, sensorPID}
 
 watcher(L) ->
-  io:format("~w~n", [L]), %print L
+  %io:format("~w~n", [L]), %print L
   receive
     {Sensor_ID, Measurement} ->
-      io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]);
-    {'DOWN', _Ref, gen_sensor, PID, anomalous_reading} ->
+      io:format("Sensor ~w measured ~w~n", [Sensor_ID, Measurement]),
+      watcher(L);
+    {'DOWN', _Ref, _Process, PID, Reason} ->
+      %io:format("received crash"),
       {Sensor_ID, SPID} = lists:keyfind(PID, 2, L),
-      io:format("Sensor ~w crashed because of ~w~n", [Sensor_ID, anomalous_reading]),
-      {Sensor_PID, _Ref} = spawn_monitor(sensor, gen_sensor, [self(), Sensor_ID]),
-      Temp_list = L -- {Sensor_ID, SPID},
+      io:format("Sensor ~w crashed because of ~w~n", [Sensor_ID, Reason]),
+      {Sensor_PID, _NRef} = spawn_monitor(sensor, gen_sensor, [self(), Sensor_ID]),
+      Temp_list = L -- [{Sensor_ID, SPID}],
       New_list = Temp_list ++ [{Sensor_ID, Sensor_PID}],
       io:format("~w~n", [New_list]),
       watcher(New_list)

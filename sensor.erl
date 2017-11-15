@@ -11,7 +11,9 @@ gen_sensor(Watcher_Pid, Sensor_ID) ->
     Measurement = rand:uniform(11),
 
     case Measurement of
-        11 -> exit(anomalous_reading);
+        11 ->
+          %io:format("got an 11"),
+          exit(anomalous_reading);
         _ -> Watcher_Pid!{Sensor_ID, Measurement}
     end,
     gen_sensor(Watcher_Pid, Sensor_ID).
